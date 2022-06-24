@@ -278,11 +278,10 @@ class TestRun(FingerprintedItem):
 
 
 class Suite(FingerprintedItem):
-    def __init__(self, archiver, name, repository):
-        super(Suite, self).__init__(archiver, name)
-        data = {'full_name': self.full_name, 'name': name, 'repository': repository}
-        self.id = self.archiver.db.return_id_or_insert_and_return_id('suite', data,
-                                                                     ['repository', 'full_name'])
+    def __init__(self, archiver, application_name, name):
+        super(Suite, self).__init__(archiver, name, class_name=application_name)
+        data = {'full_name': self.full_name, 'name': name, 'application_name': application_name}
+        self.id = self.archiver.db.return_id_or_insert_and_return_id('suite', data, ['application_name', 'full_name'])
 
     @staticmethod
     def _execution_path_identifier():
@@ -619,8 +618,8 @@ class Archiver:
             build_number = previous_build_number + 1 if previous_build_number else 1
         return build_number
 
-    def begin_suite(self, name, execution_path=None):
-        suite = Suite(self, name, 'repo')
+    def begin_suite(self, application_name, name, execution_path=None):
+        suite = Suite(self, application_name, name)
         suite.set_execution_path(execution_path)
         self.stack.append(suite)
         return suite

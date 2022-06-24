@@ -39,9 +39,10 @@ class XmlOutputParser(xml.sax.handler.ContentHandler):
 class RobotFrameworkOutputParser(XmlOutputParser):
     EXCLUDED_SECTIONS = ('statistics', 'errors')
 
-    def __init__(self, archiver_instance):
+    def __init__(self, archiver_instance, application_name):
         super().__init__(archiver_instance)
         self.archiver.test_type = "Robot Framework"
+        self.application_name = application_name
 
     def startElement(self, name, attrs):
         if name in RobotFrameworkOutputParser.EXCLUDED_SECTIONS:
@@ -57,7 +58,8 @@ class RobotFrameworkOutputParser(XmlOutputParser):
                                         )
         elif name == 'suite':
             execution_path = attrs.getValue('id') if 'id' in attrs.getNames() else None
-            self.archiver.begin_suite(attrs.getValue('name'), execution_path=execution_path)
+            self.archiver.begin_suite(self.application_name, attrs.getValue('name'), 
+                                                            execution_path=execution_path)
         elif name == 'test':
             execution_path = attrs.getValue('id') if 'id' in attrs.getNames() else None
             self.archiver.begin_test(attrs.getValue('name'), execution_path=execution_path)
@@ -158,7 +160,7 @@ class RobotFrameworkOutputParser(XmlOutputParser):
 
 
 class XUnitOutputParser(XmlOutputParser):
-    def __init__(self, archiver_instance):
+    def __init__(self, archiver_instance, application_name):
         super(XUnitOutputParser, self).__init__(archiver_instance)
         self.archiver.test_type = "xunit"
 
@@ -231,7 +233,7 @@ class XUnitOutputParser(XmlOutputParser):
 
 
 class JUnitOutputParser(XmlOutputParser):
-    def __init__(self, archiver_instance):
+    def __init__(self, archiver_instance, application_name):
         super(JUnitOutputParser, self).__init__(archiver_instance)
         self.archiver.test_type = "junit"
 
@@ -318,7 +320,7 @@ class JUnitOutputParser(XmlOutputParser):
 
 
 class MochaJUnitOutputParser(XmlOutputParser):
-    def __init__(self, archiver_instance):
+    def __init__(self, archiver_instance, application_name):
         super(MochaJUnitOutputParser, self).__init__(archiver_instance)
         self.in_setup_or_teardown = False
         self.archiver.test_type = "mocha-junit"
@@ -438,7 +440,7 @@ class MochaJUnitOutputParser(XmlOutputParser):
 
 
 class PytestJUnitOutputParser(XmlOutputParser):
-    def __init__(self, archiver_instance):
+    def __init__(self, archiver_instance, application_name):
         super(PytestJUnitOutputParser, self).__init__(archiver_instance)
         self.in_setup_or_teardown = False
         self._current_class_name = None
@@ -585,7 +587,7 @@ class PytestJUnitOutputParser(XmlOutputParser):
 
 class PhpJUnitOutputParser(XmlOutputParser):
 
-    def __init__(self, archiver_instance):
+    def __init__(self, archiver_instance, application_name):
         super(PhpJUnitOutputParser, self).__init__(archiver_instance)
         self.archiver.test_type = "php-junit"
 
@@ -688,7 +690,7 @@ class PhpJUnitOutputParser(XmlOutputParser):
 
 class MSTestOutputParser(XmlOutputParser):
     # Currently only inital support for unittests
-    def __init__(self, archiver_instance):
+    def __init__(self, archiver_instance, application_name):
         super(MSTestOutputParser, self).__init__(archiver_instance)
         self.archiver.test_type = "mstest"
 
@@ -783,8 +785,17 @@ def parse_xml(xml_file, output_format, connection, config, build_number_cache):
         sys.exit('Could not find input file: ' + xml_file)
     buffer_size = 65536
     test_archiver = archiver.Archiver(connection, config, build_number_cache=build_number_cache)
+    with open(xml_file) as f:
+        ap_lst = [i.replace('<meta name="Application">', '').replace('</meta>', '') 
+                    for i in f.readlines() if '<meta name="Application">' in i]
+    if ap_lst and len(set(ap_lst)) == 1:
+        application_name = list(set(ap_lst))[0]
+        print('application_name: {}'.format(application_name))
+    else:
+        raise Exception('het is mislukt bepalen de application_name: {}'.format(ap_lst))
+
     if output_format in SUPPORTED_OUTPUT_FORMATS:
-        handler = SUPPORTED_OUTPUT_FORMATS[output_format](test_archiver)
+        handler = SUPPORTED_OUTPUT_FORMATS[output_format](test_archiver, application_name)
     else:
         raise Exception("Unsupported report format '{}'".format(output_format))
     parser = xml.sax.make_parser()
@@ -794,9 +805,9 @@ def parse_xml(xml_file, output_format, connection, config, build_number_cache):
         while buffer:
             parser.feed(buffer)
             buffer = file.read(buffer_size)
-    if len(test_archiver.stack) != 1:
-        raise Exception('File parse error. Please check you used proper output format '
-                        '(default: robotframework).')
+    #if len(test_archiver.stack) != 1:
+    #    raise Exception('File parse error. Please check you used proper output format '
+    #                    '(default: robotframework).')
     return test_archiver.end_test_run()
 
 
