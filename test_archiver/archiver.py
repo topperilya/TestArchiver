@@ -279,7 +279,7 @@ class TestRun(FingerprintedItem):
 
 class Suite(FingerprintedItem):
     def __init__(self, archiver, application_name, name):
-        super(Suite, self).__init__(archiver, name, class_name=application_name)
+        super(Suite, self).__init__(archiver, name)
         data = {'full_name': self.full_name, 'name': name, 'application_name': application_name}
         self.id = self.archiver.db.return_id_or_insert_and_return_id('suite', data, ['application_name', 'full_name'])
 
