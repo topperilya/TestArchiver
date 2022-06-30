@@ -789,7 +789,7 @@ def parse_xml(xml_file, output_format, connection, config, build_number_cache):
         ap_lst = [i.replace('<meta name="Application">', '').replace('</meta>', '') 
                     for i in f.readlines() if '<meta name="Application">' in i]
     if ap_lst and len(set(ap_lst)) == 1:
-        application_name = list(set(ap_lst))[0]
+        application_name = list(set(ap_lst))[0].replace('\n', '')
         print('application_name: {}'.format(application_name))
     else:
         raise Exception('het is mislukt bepalen de application_name: {}'.format(ap_lst))
