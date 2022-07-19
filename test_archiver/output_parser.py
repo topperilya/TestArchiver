@@ -31,7 +31,7 @@ class XmlOutputParser(xml.sax.handler.ContentHandler):
 
         test_content_set = set(['Tester_Name', 'Product_Name', 'Product_Name',
                 'Product_Number', 'Serial_Number', 'Product_File', 
-                'Product_Revision'])
+                'Product_Revision', 'Application_Version'])
         if '${' in cont and '=' in cont and \
             test_content_set.issuperset([cont.split('}')[0].replace('${', '')]):
             k = cont.split('}')[0].replace('${', '').replace(' ', '').lower()
