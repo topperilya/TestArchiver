@@ -113,6 +113,7 @@ class FingerprintedItem(TestItem):
 
         self._execution_path = None
         self._child_counters = defaultdict(lambda: 0)
+        self.test_info = {}
 
     def insert_results(self):
         raise NotImplementedError()
@@ -291,6 +292,7 @@ class Suite(FingerprintedItem):
         data = {'suite_id': self.id, 'test_run_id': self.test_run_id(),
                 'execution_path': self.execution_path()}
         data.update(self.status_and_fingerprint_values())
+        data.update(self.test_info)
         if self.id not in self.parent_item.child_suite_ids:
             try:
                 self.archiver.db.insert('suite_result', data)
@@ -513,6 +515,10 @@ class Archiver:
         self.listeners = []
         if config.change_engine_url:
             self.listeners.append(archiver_listeners.ChangeEngineListener(self, config.change_engine_url))
+        self.test_info = {}
+
+    def add_test_info(self, d):
+        self.test_info.update(d)
 
     def current_item(self, expected_type=None):
         item = self.stack[-1] if self.stack else None
@@ -629,6 +635,8 @@ class Archiver:
             self.current_item(Suite).update_status(attributes['status'], attributes['starttime'],
                                                    attributes['endtime'])
             self.current_item(Suite).metadata = attributes['metadata']
+        print('test_info: {}'.format(self.test_info))
+        self.current_item(Suite).test_info = self.test_info
         self.current_item(Suite).finish()
         suite = self.stack.pop()
         for listener in self.listeners:

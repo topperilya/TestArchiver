@@ -61,6 +61,12 @@ CREATE TABLE suite_result (
     execution_fingerprint text,
     teardown_fingerprint text,
     execution_path text,
+    tester_name text,
+    product_name text,
+    product_number text,
+    serial_number text,
+    product_file text,
+    product_revision text,
     PRIMARY KEY (test_run_id, suite_id)
 );
 CREATE UNIQUE INDEX unique_suite_result_idx ON suite_result(start_time, fingerprint);
