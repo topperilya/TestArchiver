@@ -35,10 +35,13 @@ class XmlOutputParser(xml.sax.handler.ContentHandler):
         if '${' in cont and '=' in cont and \
             test_content_set.issuperset([cont.split('}')[0].replace('${', '')]):
             k = cont.split('}')[0].replace('${', '').replace(' ', '').lower()
-            v = cont.split('}')[-1].replace('=', '').replace(' ', '')
+            v = cont.split('}')[-1].replace(' = ', '').replace('= ', '').replace(' =', '')
             #print('k: {}, v: {}'.format(k, v))
             self.archiver.add_test_info({k: v})
-
+        elif ' = ' in cont and \
+            test_content_set.issuperset([cont.split(' = ')[0].replace(' ', '')]):
+            k = cont.split(' = ')[0].replace(' ', '').lower()
+            v = cont.split(' = ')[-1]
         return cont
 
     def characters(self, content):
