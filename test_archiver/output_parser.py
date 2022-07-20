@@ -29,7 +29,7 @@ class XmlOutputParser(xml.sax.handler.ContentHandler):
         cont = ''.join(self._current_content).strip(' \n')
         self._current_content = []
 
-        test_content_set = set(['Tester_Name', 'Product_Name', 'Product_Name',
+        test_content_set = set(['Tester_Name', 'Product_Name',
                 'Product_Number', 'Serial_Number', 'Product_File', 
                 'Product_Revision', 'Application_Version'])
         if '${' in cont and '=' in cont and \
