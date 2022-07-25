@@ -40,9 +40,8 @@ class XmlOutputParser(xml.sax.handler.ContentHandler):
             self.archiver.add_test_info({k: v})
         elif 'job_build_number' in cont and 'hostname' in cont:
             for d in [{i.replace(' ', '').split('=')[0]: i.replace(' ','').split('=')[1]} for i in cont.split(',')]:
-                print('d: {}'.format(d))
+                #print('d: {}'.format(d))
                 self.archiver.add_test_info(d)
-            print('{}'.format(cont))
         return cont
 
     def characters(self, content):
