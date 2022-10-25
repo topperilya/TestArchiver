@@ -81,7 +81,8 @@ class FingerprintedItem(TestItem):
 
         self.status = None
         self.setup_status = None
-        self.execution_status = None
+        #self.execution_status = None
+        self.execution_status = 'FAIL'
         self.teardown_status = None
         self.failed_by_teardown = False
 
